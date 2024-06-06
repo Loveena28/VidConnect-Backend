@@ -6,7 +6,7 @@ const cors = require('cors');
 const app = express();
 app.use(
   cors({
-    origin: ["https://vid-connect-theta.vercel.app"],
+    origin: ["https://vid-connect-theta.vercel.app","http://localhost:4200"],
     credentials: true,
   })
 );

@@ -4,13 +4,13 @@ const app = express();
 const http = require('http').Server(app);
 const io = require("socket.io")(http, {
   cors: {
-    origin: "https://vid-connect-theta.vercel.app"
+    origin: ["https://vid-connect-theta.vercel.app", "http://localhost:4200"]
   }
 });
 
 app.use(
   cors({
-    origin: ["https://vid-connect-theta.vercel.app"],
+    origin: ["https://vid-connect-theta.vercel.app", "http://localhost:4200"],
     credentials: true,
   })
 );
