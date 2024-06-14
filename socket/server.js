@@ -16,12 +16,12 @@ app.use(
 );
 
 io.on('connection', (socket) => {
-  socket.on('join-room', (roomId, peerId) => {
+  socket.on('join-room', (roomId, peerId, name) => {
     socket.join(roomId);
-    console.log(socket.id, 'has joined the room', roomId);
+    console.log(`${name} with id ${peerId} has joined the room ${roomId}`);
 
     // Broadcast user joined to other participants in the room
-    socket.broadcast.to(roomId).emit('user-joined', peerId);
+    socket.broadcast.to(roomId).emit('user-joined', peerId, name);
 
     // Handle signaling events (mute, unmute, etc.)
     socket.on('signal', (data) => {
