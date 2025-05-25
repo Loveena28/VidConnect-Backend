@@ -15,27 +15,43 @@ app.use(
   })
 );
 
-io.on('connection', (socket) => {
-  socket.on('join-room', (roomId, peerId, name) => {
+// const roomUsers = {};
+
+io.on("connection", (socket) => {
+  socket.on("join-room", (roomId, peerId, name) => {
     socket.join(roomId);
-    console.log(`${name} with id ${peerId} has joined the room ${roomId}`);
+    // add debugging information
+    console.log(`Socket ${socket.id} joined room ${roomId} as ${peerId} (${name})`);
+    socket.data = { roomId, peerId, name };
 
-    // Broadcast user joined to other participants in the room
-    socket.broadcast.to(roomId).emit('user-joined', peerId, name);
+    // if (!roomUsers[roomId]) roomUsers[roomId] = {};
+    // roomUsers[roomId][peerId] = { name };
 
-    // Handle signaling events (mute, unmute, etc.)
-    socket.on('signal', (data) => {
-      io.to(data.to).emit('signal', data.signal);
-    });
+    // Send existing users in this room only
+    // const existingUsers = Object.entries(roomUsers[roomId])
+    //   .filter(([id]) => id !== peerId)
+    //   .map(([id, data]) => ({ userId: id, name: data.name }));
 
-    // Handle user disconnection
-    socket.on('disconnect', () => {
-      console.log('User disconnected');
-      // Broadcast user left to other participants
-      socket.broadcast.to(roomId).emit('user-left', peerId);
-    });
+    
+    // socket.broadcast.to(roomId).emit("existing-users", existingUsers);
+
+    console.log(`${name} (${peerId}) joined room ${roomId}`);
+    socket.broadcast.to(roomId).emit("user-joined", peerId, name);
+
+    socket.on("disconnect", () => {
+      const { roomId, peerId, name } = socket.data;
+      // if (roomUsers[roomId]) {
+      //   delete roomUsers[roomId][peerId];
+        socket.broadcast.to(roomId).emit("user-disconnected", peerId, name);
+        console.log(`${name} (${peerId}) left room ${roomId}`);
+      }
+    );
+
+    socket.on("mute-all", () => io.to(roomId).emit("mute-all"));
+    socket.on("end-meeting", () => io.to(roomId).emit("end-meeting"));
   });
 });
+
 
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
